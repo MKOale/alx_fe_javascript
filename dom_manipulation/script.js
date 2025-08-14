@@ -1,38 +1,61 @@
-// Array of quotes with text and category
+// Initial quotes array
 let quotes = [
-  { text: "The best way to predict the future is to create it.", category: "Inspiration" },
-  { text: "Life is what happens when you’re busy making other plans.", category: "Life" },
-  { text: "Success usually comes to those who are too busy to be looking for it.", category: "Success" }
+  { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Motivation" },
+  { text: "Life is what happens when you're busy making other plans.", category: "Life" },
+  { text: "In the middle of every difficulty lies opportunity.", category: "Wisdom" }
 ];
 
-// Function to display a random quote
+// DOM Elements
+const quoteDisplay = document.getElementById("quoteDisplay");
+const newQuoteBtn = document.getElementById("newQuote");
+const addQuoteBtn = document.getElementById("addQuoteBtn");
+const categorySelect = document.getElementById("categorySelect");
+const newQuoteText = document.getElementById("newQuoteText");
+const newQuoteCategory = document.getElementById("newQuoteCategory");
+
+// Populate category dropdown dynamically
+function updateCategoryOptions() {
+  const categories = [...new Set(quotes.map(q => q.category))]; // Unique categories
+  categorySelect.innerHTML = ""; // Clear old options
+  categories.forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    categorySelect.appendChild(option);
+  });
+}
+updateCategoryOptions();
+
+// Show random quote based on selected category
 function showRandomQuote() {
-  let randomIndex = Math.floor(Math.random() * quotes.length);
-  let quote = quotes[randomIndex];
-  document.getElementById("quoteDisplay").innerHTML = `"${quote.text}" - <em>${quote.category}</em>`;
+  const selectedCategory = categorySelect.value;
+  const filteredQuotes = quotes.filter(q => q.category === selectedCategory);
+  
+  if (filteredQuotes.length === 0) {
+    quoteDisplay.textContent = "No quotes available in this category.";
+    return;
+  }
+
+  const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
+  quoteDisplay.textContent = `"${filteredQuotes[randomIndex].text}" - ${filteredQuotes[randomIndex].category}`;
 }
 
-// Function to add a new quote
+// Add new quote dynamically
 function addQuote() {
-  let textInput = document.getElementById("newQuoteText");
-  let categoryInput = document.getElementById("newQuoteCategory");
+  const text = newQuoteText.value.trim();
+  const category = newQuoteCategory.value.trim();
 
-  let newText = textInput.value.trim();
-  let newCategory = categoryInput.value.trim();
-
-  if (newText && newCategory) {
-    quotes.push({ text: newText, category: newCategory });
-    alert("Quote added successfully!");
-    textInput.value = "";
-    categoryInput.value = "";
+  if (text && category) {
+    quotes.push({ text, category });
+    newQuoteText.value = "";
+    newQuoteCategory.value = "";
+    updateCategoryOptions();
+    alert("New quote added successfully!");
   } else {
-    alert("Please enter both a quote and a category.");
+    alert("Please enter both quote text and category.");
   }
 }
 
 // Event listeners
-document.getElementById("newQuote").addEventListener("click", showRandomQuote);
-document.getElementById("addQuoteBtn").addEventListener("click", addQuote);
-
-// Show a random quote on page load
-showRandomQuote();
+newQuoteBtn.addEventListener("click", showRandomQuote);
+addQuoteBtn.addEventListener("click", addQuote);
