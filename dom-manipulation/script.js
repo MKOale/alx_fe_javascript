@@ -77,6 +77,80 @@ function loadQuotes() {
     quotes = JSON.parse(storedQuotes);
   }
 }
+// Quotes with categories
+let quotes = [
+  { text: "The best way to get started is to quit talking and begin doing.", category: "Motivation" },
+  { text: "Don't let yesterday take up too much of today.", category: "Wisdom" },
+  { text: "It's not whether you get knocked down, it's whether you get up.", category: "Resilience" },
+  { text: "Your time is limited, so don’t waste it living someone else’s life.", category: "Inspiration" }
+];
+
+// Load last filter selection from localStorage
+let lastFilter = localStorage.getItem("selectedCategory") || "all";
+
+// Populate dropdown categories dynamically
+function populateCategories() {
+  const categoryFilter = document.getElementById("categoryFilter");
+  const categories = [...new Set(quotes.map(q => q.category))]; // unique categories
+
+  // Clear previous options except "All"
+  categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
+
+  categories.forEach(category => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    categoryFilter.appendChild(option);
+  });
+
+  // Restore last selected filter
+  categoryFilter.value = lastFilter;
+}
+
+// Show quotes based on selected category
+function filterQuotes() {
+  const selectedCategory = document.getElementById("categoryFilter").value;
+  localStorage.setItem("selectedCategory", selectedCategory); // save filter choice
+
+  const filteredQuotes = selectedCategory === "all"
+    ? quotes
+    : quotes.filter(q => q.category === selectedCategory);
+
+  displayQuotes(filteredQuotes);
+}
+
+// Display quotes in the DOM
+function displayQuotes(quotesToShow) {
+  const display = document.getElementById("quoteDisplay");
+  display.innerHTML = "";
+  quotesToShow.forEach(q => {
+    const p = document.createElement("p");
+    p.textContent = `"${q.text}" — ${q.category}`;
+    display.appendChild(p);
+  });
+}
+
+// Generate random quote
+function generateQuote() {
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const randomQuote = quotes[randomIndex];
+  displayQuotes([randomQuote]);
+}
+
+// Add new quote
+function addQuote() {
+  const text = prompt("Enter the quote:");
+  const category = prompt("Enter the category:");
+  if (text && category) {
+    quotes.push({ text, category });
+    populateCategories(); // update categories dynamically
+    filterQuotes(); // re-filter to reflect changes
+  }
+}
+
+// Initialize
+populateCategories();
+filterQuotes();
 
 // Import quotes from JSON file
 function importFromJsonFile(event) {
