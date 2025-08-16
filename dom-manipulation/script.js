@@ -151,6 +151,75 @@ function addQuote() {
 // Initialize
 populateCategories();
 filterQuotes();
+// ---------------- Task 3: Syncing Data with Server & Conflict Resolution ----------------
+
+// Simulated server API endpoint (mock API)
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts"; 
+
+// Function to fetch quotes from "server"
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(SERVER_URL);
+    const data = await response.json();
+
+    // For simulation, we'll treat `data` as quotes
+    const serverQuotes = data.slice(0, 5).map((item, index) => ({
+      text: item.title,
+      category: index % 2 === 0 ? "Inspiration" : "Wisdom"
+    }));
+
+    // Get local quotes
+    const localQuotes = JSON.parse(localStorage.getItem("quotes")) || [];
+
+    // Conflict resolution: server data takes precedence
+    const mergedQuotes = [...serverQuotes, ...localQuotes];
+
+    // Save back to localStorage
+    localStorage.setItem("quotes", JSON.stringify(mergedQuotes));
+
+    // Update UI
+    displayQuotes();
+    populateCategories();
+
+    notifyUser("Quotes synced with server (server data prioritized).");
+  } catch (error) {
+    console.error("Error fetching from server:", error);
+  }
+}
+
+// Function to push a new quote to "server"
+async function pushQuoteToServer(quote) {
+  try {
+    const response = await fetch(SERVER_URL, {
+      method: "POST",
+      body: JSON.stringify(quote),
+      headers: { "Content-type": "application/json; charset=UTF-8" }
+    });
+    const result = await response.json();
+    console.log("Pushed to server:", result);
+  } catch (error) {
+    console.error("Error pushing to server:", error);
+  }
+}
+
+// Conflict notification system
+function notifyUser(message) {
+  const notification = document.createElement("div");
+  notification.innerText = message;
+  notification.style.position = "fixed";
+  notification.style.bottom = "20px";
+  notification.style.right = "20px";
+  notification.style.backgroundColor = "#333";
+  notification.style.color = "#fff";
+  notification.style.padding = "10px 15px";
+  notification.style.borderRadius = "5px";
+  document.body.appendChild(notification);
+
+  setTimeout(() => notification.remove(), 4000);
+}
+
+// Periodically sync with server every 20 seconds
+setInterval(fetchQuotesFromServer, 20000);
 
 // Import quotes from JSON file
 function importFromJsonFile(event) {
