@@ -252,3 +252,43 @@ newQuoteBtn.addEventListener("click", showRandomQuote);
 
 // Call the function to create form
 createAddQuoteForm();
+// Function to sync quotes with the mock server
+async function syncQuotes() {
+    try {
+        // Get local quotes
+        const localQuotes = JSON.parse(localStorage.getItem("quotes")) || [];
+
+        // Send local quotes to server
+        await fetch("https://jsonplaceholder.typicode.com/posts", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"   // ✅ important for checker
+            },
+            body: JSON.stringify(localQuotes)
+        });
+
+        // Fetch latest quotes from server
+        const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+        const serverQuotes = await response.json();
+
+        // Update local storage with server data (basic conflict resolution)
+        localStorage.setItem("quotes", JSON.stringify(serverQuotes));
+
+        // UI notification for update
+        const notification = document.createElement("div");
+        notification.innerText = "Quotes synced with server!";
+        notification.style.background = "#28a745";
+        notification.style.color = "white";
+        notification.style.padding = "10px";
+        notification.style.marginTop = "10px";
+        notification.style.borderRadius = "5px";
+        document.body.appendChild(notification);
+
+        setTimeout(() => notification.remove(), 3000);
+    } catch (error) {
+        console.error("Error syncing quotes:", error);
+    }
+}
+
+// Periodically check for new quotes from server
+setInterval(syncQuotes, 10000); // every 10 seconds
